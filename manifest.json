@@ -2,6 +2,6 @@
     "name": "DuckLoot",
     "version_number": "1.0.2",
     "website_url": "https://github.com/LuckyLeaf333/DuckLoot",
-    "description": "A Lethal Company mod which causes all scrap spawns to be rubber duckies. Only works on moons which naturally spawn rubber duckies: Artifice, Adamanace, Liquidation, Titan, Vow, Rend, and Dine.",
+    "description": "A Lethal Company mod which causes all scrap spawns to be rubber duckies.",
     "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
 }
