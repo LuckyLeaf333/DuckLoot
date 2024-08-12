@@ -14,7 +14,7 @@ namespace DuckLoot
     {
         public const string modGUID = "LuckyLeaf333.DuckLoot"; // a unique name for your mod
         public const string modName = "DuckLoot"; // the name of your mod
-        public const string modVersion = "1.0.2"; // the version of your mod
+        public const string modVersion = "1.0.21"; // the version of your mod
 
         internal new static ManualLogSource Logger;
         private readonly Harmony harmony = new Harmony(modGUID); // Creating a Harmony instance which will run the mods
