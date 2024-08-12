@@ -1,10 +1,11 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
+using BepInEx.Logging;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using Unity;
 using UnityEngine;
-using System.IO;
 
 namespace DuckLoot
 {
@@ -13,48 +14,78 @@ namespace DuckLoot
     {
         public const string modGUID = "LuckyLeaf333.DuckLoot"; // a unique name for your mod
         public const string modName = "DuckLoot"; // the name of your mod
-        public const string modVersion = "1.0.1"; // the version of your mod
+        public const string modVersion = "1.0.2"; // the version of your mod
 
+        internal new static ManualLogSource Logger;
         private readonly Harmony harmony = new Harmony(modGUID); // Creating a Harmony instance which will run the mods
+        public static ConfigEntry<int> configMultiplier;
 
         void Awake() // runs when Lethal Company is launched
         {
-            var BepInExLogSource = BepInEx.Logging.Logger.CreateLogSource(modGUID); // creates a logger for the BepInEx console
-            BepInExLogSource.LogMessage(modGUID + " has loaded succesfully."); // show the successful loading of the mod in the BepInEx console
+            configMultiplier = base.Config.Bind(
+                "Duck Spawn Modification",                          // Config section
+                "DuckSpawnMultiplier",                     // Key of this config
+                1,                    // Default value
+                "Multiplies the amount of ducks by the given multiplier."    // Description
+            );
 
-            harmony.PatchAll(typeof(duckLoot)); // run the mod class as a plugin
+            Logger = base.Logger;
+
+            Logger.LogInfo($"Plugin {modGUID} is loaded!");
+            harmony.PatchAll(typeof(StartOfRoundPatch)); // run the mod class as a plugin
         }
     }
 
-    [HarmonyPatch(typeof(RoundManager))] // selecting the Lethal Company script you want to mod
-    [HarmonyPatch("LoadNewLevel")] // select during which Lethal Company void in the choosen script the mod will execute
-    class duckLoot // This is your mod if you use this is the harmony.PatchAll() command
+    [HarmonyPatch(typeof(StartOfRound))] // selecting the Lethal Company script you want to mod
+    [HarmonyPatch("StartGame")]
+    class StartOfRoundPatch // This is your mod if you use this is the harmony.PatchAll() command
     {
-        [HarmonyPostfix] // Postfix means execute the plugin after the Lethal Company script. Prefix means execute plugin before.
-        static void Postfix(ref SelectableLevel ___currentLevel) // refer to variables in the Lethal Company script to manipulate them. Example: (ref int ___health). Use the 3 underscores to refer.
+        [HarmonyPrefix]
+        // refer to variables in the Lethal Company script to manipulate them. Example: (ref int ___health). Use the 3 underscores to refer.
+        static void Prefix(ref SelectableLevel[] ___levels, ref SelectableLevel ___currentLevel)
         {
-            int i; // Track the index of the duck, if it exists
-            bool duck_exists = false;
+            DuckLootMod.Logger.LogDebug("Attempting to change duck spawn info");
 
-            for (i = 0; i < ___currentLevel.spawnableScrap.Count; i++)
+            SpawnableItemWithRarity duckItem = null;
+
+            // Search for a duck item within the moon level info
+            foreach (var moon in ___levels)
             {
-                if (___currentLevel.spawnableScrap[i].spawnableItem.itemName != "Rubber Ducky")
+                DuckLootMod.Logger.LogDebug(moon.PlanetName);
+                if (moon.PlanetName == "56 Vow")
                 {
-                    continue;
-                }
-                else
-                {
-                    duck_exists = true;
+                    foreach (var scrap in moon.spawnableScrap)
+                    {
+                        if (scrap.spawnableItem.itemName == "Rubber Ducky")
+                        {
+                            duckItem = scrap;
+                            break;
+                        }
+                    }
                     break;
                 }
             }
-            if (duck_exists)
+
+            // Set the spawableScrap for the current level to only Rubber Duckies
+            if (duckItem != null)
             {
-                for(int j = 0; j < ___currentLevel.spawnableScrap.Count; j++)
-                {
-                    ___currentLevel.spawnableScrap[j] = ___currentLevel.spawnableScrap[i];   
-                }
+                List<SpawnableItemWithRarity> duckList = new List<SpawnableItemWithRarity>();
+                duckList.Add(duckItem);
+                ___currentLevel.spawnableScrap = duckList;
+                DuckLootMod.Logger.LogDebug("Current level spawnable scrap set to duck");
             }
+            else
+            {
+                DuckLootMod.Logger.LogDebug("Error: duck not found");
+            }
+
+            // Modify the amount of scrap that can spawn on the level
+            DuckLootMod.Logger.LogDebug($"Attempting to modify scrap spawn amount by {DuckLootMod.configMultiplier.Value}.");
+            ___currentLevel.minScrap = ___currentLevel.minScrap * DuckLootMod.configMultiplier.Value;
+            ___currentLevel.maxScrap = ___currentLevel.maxScrap * DuckLootMod.configMultiplier.Value;
+            ___currentLevel.minTotalScrapValue = ___currentLevel.minTotalScrapValue * DuckLootMod.configMultiplier.Value;
+            ___currentLevel.maxTotalScrapValue = ___currentLevel.maxTotalScrapValue * DuckLootMod.configMultiplier.Value;
+            DuckLootMod.Logger.LogDebug("Completed modification of scrap spawn amount.");
         }
     }
 }

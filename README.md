@@ -4,11 +4,11 @@ A Lethal Company mod which causes all scrap spawns to be rubber duckies.
 
 ## Description
 
-Only works on moons which naturally spawn rubber duckies: Artifice, Adamanace, Liquidation, Titan, Vow, Rend, and Dine.
+Causea all scrap spawns to be rubber duckies. Does not affect special scrap items such as keys and apparatices.
 
 ## Dependencies
 
-Requires BepInEx (BepInEx-BepInExPack-5.4.2100)
+Requires BepInEx (BepInEx-BepInExPack-5.4.2100).
 
 ## Installation
 
@@ -16,7 +16,14 @@ Install BepInEx. Then, put DuckLoot.dll in BepInEx/plugins within the Lethal Com
 
 ## Usage
 
-Simply run the game after installing
+Simply run the game after installing.
+
+### Configs
+
+The config file will be generated upon loading the mod in-game for the first time and should be in BepInEx/config.
+
+#### DuckSpawnMultiplier 
+Multiplies the amount of scrap spawns. Naturally, since all scrap will be ducks, this increases the amount of ducks that spawn.
 
 ## References
 
