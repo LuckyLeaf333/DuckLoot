@@ -1,6 +1,6 @@
 {
     "name": "DuckLoot",
-    "version_number": "1.0.21",
+    "version_number": "1.0.22",
     "website_url": "https://github.com/LuckyLeaf333/DuckLoot",
     "description": "A Lethal Company mod which causes all scrap spawns to be rubber duckies.",
     "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
